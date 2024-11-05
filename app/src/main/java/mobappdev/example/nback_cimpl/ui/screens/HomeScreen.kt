@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import mobappdev.example.nback_cimpl.R
 import mobappdev.example.nback_cimpl.ui.viewmodels.FakeVM
+import mobappdev.example.nback_cimpl.ui.viewmodels.GameType
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
 
 /**
@@ -49,7 +51,8 @@ import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
 
 @Composable
 fun HomeScreen(
-    vm: GameViewModel
+    vm: GameViewModel,
+    onStartGame: () -> Unit // Lambda for screen switch
 ) {
     val highscore by vm.highscore.collectAsState()  // Highscore is its own StateFlow
     val gameState by vm.gameState.collectAsState()
@@ -80,6 +83,14 @@ fun HomeScreen(
                     Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Text(
+                        modifier = Modifier.padding(32.dp),
+                        text = "Game Type = ${gameState.gameType}\n" +
+                                "nBack = ${gameState.nBackValue}\n" +
+                                "Timer = 2000 ms (2s)\n" +
+                                "Number of Events ${gameState.eventSize}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                     if (gameState.eventValue != -1) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
@@ -87,14 +98,20 @@ fun HomeScreen(
                             textAlign = TextAlign.Center
                         )
                     }
-                    Button(onClick = vm::startGame) {
-                        Text(text = "Generate eventValues")
+                    Button(onClick ={onStartGame()},
+                    modifier = Modifier.height(110.dp)
+                        .width(280.dp)) {
+
+                        Text(
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.displaySmall,
+                            text = "Start")
                     }
                 }
             }
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = "Start Game".uppercase(),
+                text = "Pick game type".uppercase(),
                 style = MaterialTheme.typography.displaySmall
             )
             Row(
@@ -106,11 +123,8 @@ fun HomeScreen(
             ) {
                 Button(onClick = {
                     // Todo: change this button behaviour
-                    scope.launch {
-                        snackBarHostState.showSnackbar(
-                            message = "Hey! you clicked the audio button"
-                        )
-                    }
+
+                    vm.setGameType(GameType.Audio)
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.sound_on),
@@ -123,12 +137,14 @@ fun HomeScreen(
                 Button(
                     onClick = {
                         // Todo: change this button behaviour
-                        scope.launch {
+                      /*  scope.launch {
                             snackBarHostState.showSnackbar(
                                 message = "Hey! you clicked the visual button",
                                 duration = SnackbarDuration.Short
                             )
                         }
+                      */
+                        vm.setGameType(GameType.Visual)
                     }) {
                     Icon(
                         painter = painterResource(id = R.drawable.visual),
@@ -148,6 +164,9 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     // Since I am injecting a VM into my homescreen that depends on Application context, the preview doesn't work.
     Surface(){
-        HomeScreen(FakeVM())
+        HomeScreen(
+            FakeVM(),
+            onStartGame = { }
+        )
     }
 }
