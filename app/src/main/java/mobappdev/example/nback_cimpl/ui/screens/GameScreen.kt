@@ -15,7 +15,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import mobappdev.example.nback_cimpl.R
+import mobappdev.example.nback_cimpl.ui.theme.Purple40
+import mobappdev.example.nback_cimpl.ui.theme.PurpleGrey40
 import mobappdev.example.nback_cimpl.ui.viewmodels.FakeVM
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameState
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameType
@@ -30,6 +33,10 @@ fun GameScreen(
     val gameState by vm.gameState.collectAsState()
     val score by vm.score.collectAsState()
 
+    //var isMatchFound by remember { mutableStateOf(true) }
+    var buttonColor by remember { mutableStateOf(Purple40) } // Initial color
+    val coroutineScope = rememberCoroutineScope() // Coroutine scope for managing coroutines
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -37,13 +44,10 @@ fun GameScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // Start or restart game button
-        Button(onClick = {
-            vm.resetGame()
-            onBackToHome() }) {
-            Text("Back Home")
+        LaunchedEffect( Unit) {
+            vm.startGame()
         }
+
         Spacer(modifier = Modifier.height(10.dp))
         Text(text = "N-Back Game", style = MaterialTheme.typography.titleLarge)
 
@@ -56,8 +60,19 @@ fun GameScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         if (gameState.roundFinished){
-           Text("Round finished with score of $score")
 
+            val persentage = (gameState.urMatches.toFloat()/gameState.actualMatches)*100
+
+
+           Text("Round finished with point score of $score out of ${gameState.actualMatches*gameState.nBackValue}\n" +
+                   "Matches: ${gameState.urMatches} out of ${gameState.actualMatches}\n" +
+                   "With a $persentage%")
+
+            Button(onClick = {
+                vm.resetGame()
+                onBackToHome() }) {
+                Text("Back Home")
+            }
         }else {
             if (gameState.gameType == GameType.Visual) GridVisualGame(gameState)
             if (gameState.gameType == GameType.Audio) {
@@ -69,25 +84,34 @@ fun GameScreen(
                     .aspectRatio(3f / 2f)
             )}
 
+
             Spacer(modifier = Modifier.height(20.dp))
-            // "Match" button for the user to indicate a match
-            Button(onClick = { vm.checkMatch() },
+
+
+            Button(onClick = {
+                val isMatchFound =  vm.checkMatch()
+
+                buttonColor = if (isMatchFound) Color.Green else Color.Red
+
+                coroutineScope.launch {
+                    delay(400) // Delay for 500ms
+                    buttonColor = Purple40 // Revert to original color
+                }
+                             },
             modifier = Modifier.height(100.dp)
-                .width(240.dp)
+                .width(240.dp),
+                colors = ButtonDefaults.buttonColors(buttonColor)
             ) {
                 Text(
                     "Match",
                     style = MaterialTheme.typography.displayLarge
                 )
             }
+
+
         }
         Spacer(modifier = Modifier.height(60.dp))
-
-        // Start or restart game button
-        Button(onClick = { vm.startGame() }) {
-            Text("Start Round",
-                style = MaterialTheme.typography.headlineMedium)
-        }
+        
     }
 }
 
@@ -112,15 +136,14 @@ fun GridVisualGame(gameState: GameState){
                         val animatableColor = remember { Animatable(Color.LightGray) }
 
                         // Trigger the blink effect whenever the position matches `gameState.eventValue`
-                        LaunchedEffect(position == gameState.eventValue  ) {
+                        LaunchedEffect(gameState.eventIndex ) {
                             if (position == gameState.eventValue ) {
                                 // Animate to green
                                 animatableColor.animateTo(
                                     targetValue = Color.Green,
                                     animationSpec = tween(durationMillis = 500) // Blink duration
                                 )
-                                // Hold green briefly, then revert to gray
-                                delay(500) // Time to stay green
+                                delay(500)
                                 animatableColor.animateTo(
                                     targetValue = Color.LightGray,
                                     animationSpec = tween(durationMillis = 500) // Instant revert to gray

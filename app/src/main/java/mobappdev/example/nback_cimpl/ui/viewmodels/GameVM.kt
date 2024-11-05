@@ -45,7 +45,7 @@ interface GameViewModel {
     fun startGame()
     fun resetGame()
 
-    fun checkMatch()
+    fun checkMatch():Boolean
 }
 
 class GameVM(
@@ -120,7 +120,7 @@ class GameVM(
 
     }
 
-    override fun checkMatch() {
+    override fun checkMatch():Boolean {
         /**
          * Todo: This function should check if there is a match when the user presses a match button
          * Make sure the user can only register a match once for each event.
@@ -128,22 +128,25 @@ class GameVM(
         if (_gameState.value.eventIndex>=_gameState.value.nBackValue){
             val isMatch = events[_gameState.value.eventIndex] == events[_gameState.value.eventIndex - _gameState.value.nBackValue]
             if (isMatch) {
-                _gameState.value = _gameState.value.copy(urMatches = _gameState.value.urMatches +1)
+                _gameState.value = _gameState.value.copy(urMatches = _gameState.value.urMatches + 1)
                 _score.value += _gameState.value.nBackValue
                 events[_gameState.value.eventIndex - _gameState.value.nBackValue] = -1
                 Log.d("GameVM", "Match found at index ${_gameState.value.eventIndex}")
+                return true
             } else {
                 _score.value -= 1
+                _gameState.value = _gameState.value.copy(urMatches = _gameState.value.urMatches - 1)
                 Log.d("GameVM", "No match at index ${_gameState.value.eventIndex}")
             }
         } else {
-            _score.value -= 1
+            _score.value = 0
             Log.d("GameVM", "Not enough events yet to check for a match")
         }
+        return false
     }
 
     private suspend fun runAudioGame(events: Array<Int>) {
-        val numberToLetter = arrayOf('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I')
+        val numberToLetter = arrayOf('A', 'Z', 'Q', 'T', 'R', 'K', 'W', 'X', 'I')
         // Todo: Make work for Basic grade
         for (value in events) {
             _gameState.value = _gameState.value.copy(eventValue = value)
@@ -218,7 +221,7 @@ data class GameState(
     val roundFinished: Boolean = false,
     val nBackValue: Int = 2,
     val eventSize: Int = 10,
-    val eventIndex: Int = 0,
+    val eventIndex: Int = -1,
     val urMatches: Int = 0,
     val actualMatches: Int = 0
 
@@ -238,7 +241,8 @@ class FakeVM: GameViewModel{
     override fun startGame() {
     }
 
-    override fun checkMatch() {
+    override fun checkMatch():Boolean {
+        return true
     }
 
     override fun resetGame() {
