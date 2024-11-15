@@ -33,9 +33,6 @@ fun GameScreen(
     val gameState by vm.gameState.collectAsState()
     val score by vm.score.collectAsState()
 
-    //var isMatchFound by remember { mutableStateOf(true) }
-    var buttonColor by remember { mutableStateOf(Purple40) } // Initial color
-    val coroutineScope = rememberCoroutineScope() // Coroutine scope for managing coroutines
 
     Column(
         modifier = Modifier
@@ -63,7 +60,6 @@ fun GameScreen(
 
             val persentage = (gameState.urMatches.toFloat()/gameState.actualMatches)*100
 
-
            Text("Round finished with point score of $score out of ${gameState.actualMatches*gameState.nBackValue}\n" +
                    "Matches: ${gameState.urMatches} out of ${gameState.actualMatches}\n" +
                    "With a $persentage%")
@@ -82,31 +78,11 @@ fun GameScreen(
                 modifier = Modifier
                     .height(48.dp)
                     .aspectRatio(3f / 2f)
-            )}
-
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-            Button(onClick = {
-                val isMatchFound =  vm.checkMatch()
-
-                buttonColor = if (isMatchFound) Color.Green else Color.Red
-
-                coroutineScope.launch {
-                    delay(400) // Delay for 500ms
-                    buttonColor = Purple40 // Revert to original color
-                }
-                             },
-            modifier = Modifier.height(100.dp)
-                .width(240.dp),
-                colors = ButtonDefaults.buttonColors(buttonColor)
-            ) {
-                Text(
-                    "Match",
-                    style = MaterialTheme.typography.displayLarge
                 )
             }
+            Spacer(modifier = Modifier.height(20.dp))
+
+            MatchButton(vm)
 
 
         }
@@ -114,6 +90,35 @@ fun GameScreen(
         
     }
 }
+
+@Composable
+fun MatchButton(vm: GameViewModel){
+    //var isMatchFound by remember { mutableStateOf(true) }
+    var buttonColor by remember { mutableStateOf(Purple40) } // Initial color
+    val coroutineScope = rememberCoroutineScope() // Coroutine scope for managing coroutines
+
+    Button(onClick = {
+        val isMatchFound =  vm.checkMatch()
+
+        buttonColor = if (isMatchFound) Color.Green else Color.Red
+
+        coroutineScope.launch {
+            delay(400) // Delay for 500ms
+            buttonColor = Purple40 // Revert to original color
+        }
+    },
+        modifier = Modifier.height(100.dp)
+            .width(240.dp),
+        colors = ButtonDefaults.buttonColors(buttonColor)
+    ) {
+        Text(
+            "Match",
+            style = MaterialTheme.typography.displayLarge
+        )
+    }
+
+}
+
 
 
 @Composable

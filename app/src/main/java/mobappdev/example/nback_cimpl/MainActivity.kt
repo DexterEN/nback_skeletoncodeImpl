@@ -34,7 +34,9 @@ import mobappdev.example.nback_cimpl.ui.viewmodels.GameVM
 
 
 class MainActivity : ComponentActivity() {
+
     private lateinit var textToSpeech: TextToSpeech
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)

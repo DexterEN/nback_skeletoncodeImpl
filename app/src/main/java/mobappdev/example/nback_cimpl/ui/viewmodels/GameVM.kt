@@ -179,8 +179,8 @@ class GameVM(
 
    override fun resetGame() {
         _gameState.value = GameState() // Resets GameState to initial values
-        _score.value = 0                // Reset score
-        events = emptyArray()           // Clear events if needed
+        _score.value = 0
+        events = emptyArray()
     }
 
     private fun runAudioVisualGame(){

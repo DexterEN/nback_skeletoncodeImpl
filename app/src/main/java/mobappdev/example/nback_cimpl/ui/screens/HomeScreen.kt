@@ -91,13 +91,7 @@ fun HomeScreen(
                                 "Number of Events ${gameState.eventSize}",
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    if (gameState.eventValue != -1) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Current eventValue is: ${gameState.eventValue}",
-                            textAlign = TextAlign.Center
-                        )
-                    }
+
                     Button(onClick ={onStartGame()},
                     modifier = Modifier.height(110.dp)
                         .width(280.dp)) {
@@ -122,9 +116,8 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = {
-                    // Todo: change this button behaviour
-
                     vm.setGameType(GameType.Audio)
+                   // onStartGame()
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.sound_on),
@@ -136,15 +129,8 @@ fun HomeScreen(
                 }
                 Button(
                     onClick = {
-                        // Todo: change this button behaviour
-                      /*  scope.launch {
-                            snackBarHostState.showSnackbar(
-                                message = "Hey! you clicked the visual button",
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                      */
                         vm.setGameType(GameType.Visual)
+                        //onStartGame()
                     }) {
                     Icon(
                         painter = painterResource(id = R.drawable.visual),
